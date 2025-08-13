@@ -6,7 +6,13 @@ const cors = require('cors');
 const app = express();
 const prisma = new PrismaClient();
 app.use(express.json());
-app.use(cors());
+
+// Enable CORS for the specific Vercel frontend origin
+app.use(cors({
+  origin: 'https://udyam-frontend-fuzhd40f0-sahej-prakashs-projects.vercel.app', // Your Vercel URL
+  methods: ['GET', 'POST', 'OPTIONS'], // Allow necessary methods
+  allowedHeaders: ['Content-Type'] // Allow necessary headers
+}));
 
 const submissionSchema = z.object({
   hasAadhaar: z.string().optional(),
@@ -26,5 +32,5 @@ app.post('/api/submit', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001; // Use Railway's PORT or fallback to 3001
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
