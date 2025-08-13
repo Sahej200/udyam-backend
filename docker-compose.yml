@@ -21,7 +21,7 @@ services:
   backend:
     build: .
     environment:
-      - DATABASE_URL=postgresql://postgres:sahej20@localhost:5432/udyamdb?schema=public
+      - postgresql://postgres:QHSGcCILmBNyqcgJcvReKCOWulcAzixb@postgres.railway.internal:5432/railway
     depends_on:
       postgres:
         condition: service_healthy
