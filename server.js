@@ -6,18 +6,41 @@ const cors = require('cors');
 const app = express();
 const prisma = new PrismaClient();
 
-// ✅ CORS configuration
+// ✅ Fixed allowed production domains (add your final one here)
+const allowedOrigins = [
+  'https://udyam-frontend.vercel.app', // your final production domain
+];
+
+// ✅ Dynamic CORS: allow all Vercel previews + fixed domains
 const corsOptions = {
-  origin: 'https://udyam-frontend-fuzhd40f0-sahej-prakashs-projects.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  origin: function (origin, callback) {
+    try {
+      // Allow requests with no origin (e.g., curl, mobile apps)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const hostname = new URL(origin).hostname;
+
+      if (
+        allowedOrigins.includes(origin) || // explicitly allowed domains
+        hostname.endsWith('.vercel.app') // allow any vercel.app subdomain
+      ) {
+        return callback(null, true);
+      }
+
+      callback(new Error('Not allowed by CORS'));
+    } catch (err) {
+      callback(new Error('Invalid Origin'));
+    }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 200
 };
 
-// ✅ Apply CORS globally BEFORE anything else
 app.use(cors(corsOptions));
-
-// ✅ Handle all preflight requests
+// ✅ Handle preflight requests for all routes
 app.options('*', cors(corsOptions));
 
 app.use(express.json());
@@ -25,10 +48,16 @@ app.use(express.json());
 // ✅ Zod validation schema
 const submissionSchema = z.object({
   hasAadhaar: z.string().optional(),
-  aadhaarNumber: z.string().regex(/^\d{12}$/, 'Invalid Aadhaar').max(12).optional(),
+  aadhaarNumber: z.string()
+    .regex(/^\d{12}$/, 'Invalid Aadhaar')
+    .max(12)
+    .optional(),
   name: z.string().min(1, 'Required').optional(),
   otp: z.string().max(6).optional(),
-  panNumber: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN').max(10).optional(),
+  panNumber: z.string()
+    .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN')
+    .max(10)
+    .optional(),
 });
 
 // ✅ POST route
