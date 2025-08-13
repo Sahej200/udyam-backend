@@ -5,30 +5,33 @@ const cors = require('cors');
 
 const app = express();
 const prisma = new PrismaClient();
-app.use(express.json());
 
-// CORS configuration for the specific Vercel frontend origin
+// ✅ CORS configuration
 const corsOptions = {
-  origin: 'https://udyam-frontend-fuzhd40f0-sahej-prakashs-projects.vercel.app', // Your exact Vercel URL
-  methods: ['GET', 'POST', 'OPTIONS'], // Explicitly allow OPTIONS for preflight
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
-  optionsSuccessStatus: 200 // Respond 200 to OPTIONS
+  origin: 'https://udyam-frontend-fuzhd40f0-sahej-prakashs-projects.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 };
 
-// Apply CORS middleware
+// ✅ Apply CORS globally BEFORE anything else
 app.use(cors(corsOptions));
 
-// Explicitly handle OPTIONS preflight requests
-app.options('/api/submit', cors(corsOptions));
+// ✅ Handle all preflight requests
+app.options('*', cors(corsOptions));
 
+app.use(express.json());
+
+// ✅ Zod validation schema
 const submissionSchema = z.object({
   hasAadhaar: z.string().optional(),
-  aadhaarNumber: z.string().regex(/\d{12}/, 'Invalid Aadhaar').max(12).optional(),
+  aadhaarNumber: z.string().regex(/^\d{12}$/, 'Invalid Aadhaar').max(12).optional(),
   name: z.string().min(1, 'Required').optional(),
   otp: z.string().max(6).optional(),
-  panNumber: z.string().regex(/[A-Z]{5}[0-9]{4}[A-Z]{1}/, 'Invalid PAN').max(10).optional(),
+  panNumber: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN').max(10).optional(),
 });
 
+// ✅ POST route
 app.post('/api/submit', async (req, res) => {
   try {
     const data = submissionSchema.parse(req.body);
@@ -40,4 +43,4 @@ app.post('/api/submit', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
