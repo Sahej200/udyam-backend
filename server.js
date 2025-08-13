@@ -7,12 +7,19 @@ const app = express();
 const prisma = new PrismaClient();
 app.use(express.json());
 
-// Enable CORS for the specific Vercel frontend origin
-app.use(cors({
-  origin: 'https://udyam-frontend-fuzhd40f0-sahej-prakashs-projects.vercel.app', // Your Vercel URL
-  methods: ['GET', 'POST', 'OPTIONS'], // Allow necessary methods
-  allowedHeaders: ['Content-Type'] // Allow necessary headers
-}));
+// CORS configuration for the specific Vercel frontend origin
+const corsOptions = {
+  origin: 'https://udyam-frontend-fuzhd40f0-sahej-prakashs-projects.vercel.app', // Your exact Vercel URL
+  methods: ['GET', 'POST', 'OPTIONS'], // Explicitly allow OPTIONS for preflight
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
+  optionsSuccessStatus: 200 // Respond 200 to OPTIONS
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+// Explicitly handle OPTIONS preflight requests
+app.options('/api/submit', cors(corsOptions));
 
 const submissionSchema = z.object({
   hasAadhaar: z.string().optional(),
