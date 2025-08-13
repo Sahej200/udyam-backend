@@ -21,7 +21,7 @@ services:
   backend:
     build: .
     environment:
-      - postgresql://postgres:QHSGcCILmBNyqcgJcvReKCOWulcAzixb@postgres.railway.internal:5432/railway
+      - https://udyam-backend-production.up.railway.app
     depends_on:
       postgres:
         condition: service_healthy
